@@ -53,51 +53,6 @@ def PlayTimeGenre(genre: str = Query(..., title="Género del juego")) -> Dict[st
         return {"most_played_year": max_playtime_year}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
-
-@app.get('/user_for_genre', tags=['UserForGenre'])
-def UserForGenre(genre: str = Query(..., title="Género del juego")):
-    """
-    Obtiene información sobre el usuario con más horas jugadas para un género de juegos específico.
-
-    Parameters:
-    - genre (str): El género del juego para el cual se desea obtener la información.
-
-    Returns:
-    Dict: Un diccionario que contiene el usuario con más horas jugadas y una lista de acumulación
-          de horas jugadas por año para el género proporcionado.
-          Estructura del diccionario:
-          {
-              "Usuario con más horas jugadas para [genre]": [user_id],
-              "Horas jugadas": [{"Año": [year], "Horas": [hours]}, ...]
-          }
-    
-    Raises:
-    HTTPException: Se genera una excepción HTTP en caso de que no se encuentren datos para el género proporcionado
-                  o si ocurre algún otro error durante la ejecución.
-    """
-    try:
-        # Filtrar el DataFrame por el género proporcionado
-        genre_df = df[df[genre] == 1]
-
-        if genre_df.empty:
-            raise HTTPException(status_code=404, detail=f"No hay datos para el género: {genre}")
-
-        # Encontrar el usuario con más horas jugadas
-        max_played_user = genre_df.loc[genre_df['playtime_forever'].idxmax()]['user_id']
-
-        # Agrupar por año y sumar las horas jugadas
-        genre_year_playtime = genre_df.groupby('year')['playtime_forever'].sum()
-
-        # Crear la lista de acumulación de horas jugadas por año
-        playtime_list = [{"Año": year, "Horas": hours} for year, hours in genre_year_playtime.items()]
-
-        return {
-            "Usuario con más horas jugadas para {}".format(genre): max_played_user,
-            "Horas jugadas": playtime_list
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get('/users_recommend', tags=['UsersRecommend'])
