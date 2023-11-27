@@ -7,8 +7,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI()
 
-# Supongamos que tu DataFrame se llama df
-df = pd.read_parquet('dataset-games.parquet')
+# Cargamos el archivo a un Dataframe
+df = pd.read_parquet('steam_games.parquet')
 
 @app.get('/playtime_genre', tags=['PlayTimeGenre'])
 def PlayTimeGenre(genre: str = Query(..., title="Género del juego")) -> Dict[str, int]:
@@ -219,7 +219,7 @@ def sentiment_analysis(developer: str = Query(..., title="Empresa desarrolladora
     
 
 
-df_items_unicos = df[['item_id', 'item_name', 'Action', 'Adventure', 'Casual', 'Indie', 'RPG', 'Simulation', 'Strategy']]
+df_items_unicos = df[['item_id', 'item_name', 'Action', 'Adventure', 'Indie', 'RPG', 'Strategy']]
 df_items_unicos = df_items_unicos.drop_duplicates(subset='item_id')
 df_items_unicos.set_index('item_id', inplace=True)
 
@@ -247,7 +247,7 @@ def recommend_games(item_id: int = Query(..., title="ID del juego")) -> List[str
             raise HTTPException(status_code=404, detail=f"No se encontró información para el juego con item_id '{item_id}'")
         
         # Obtener el género asociado al 'item_id'
-        genre = df_items_unicos.loc[item_id, ['Action', 'Adventure', 'Casual', 'Indie', 'RPG', 'Simulation', 'Strategy']].idxmax()
+        genre = df_items_unicos.loc[item_id, ['Action', 'Adventure', 'Indie', 'RPG']].idxmax()
 
         # Obtener la fila de similitud correspondiente
         fila_similitud = df_similitud[df_items_unicos.index.get_loc(item_id)]
